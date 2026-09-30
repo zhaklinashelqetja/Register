@@ -1,15 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import bcrypt from 'bcrypt';
-import mysql from 'mysql2/promise';
-
-const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'luisha19_registration_app',
-    waitForConnections: true,
-    connectionLimit: 10
-});
+import { db } from '$lib/server/db';
 
 export const actions = {
     default: async ({ request }) => {
@@ -77,12 +68,7 @@ export const actions = {
                 [name, email, passwordHash]
             );
 
-            throw redirect(303, '/activate');
         } catch (error) {
-            if (error?.status === 303) {
-                throw error;
-            }
-
             console.error(error);
 
             return fail(500, {
@@ -93,5 +79,7 @@ export const actions = {
                 email
             });
         }
+
+        redirect(303, '/activate');
     }
 };
