@@ -109,9 +109,8 @@ export const actions = {
 
 			// Use the configured public origin so email links work when opened
 			// from another device (where localhost would refer to that device).
-			const baseUrl = env.PUBLIC_BASE_URL?.trim() || url.origin;
-			const activationUrl = new URL('/activate', baseUrl);
-			activationUrl.searchParams.set('token', token);
+			const activationUrl = new URL('/activate', url.origin);
+            activationUrl.searchParams.set('token', token);     
 			stage = 'sending the activation email';
 			await sendActivationMail(email, name, activationUrl.toString());
 		} catch (error) {
