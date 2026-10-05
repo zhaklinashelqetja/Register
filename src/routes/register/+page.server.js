@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { env } from '$env/dynamic/private';
 import db from '$lib/server/db';
 import { sendActivationMail } from '$lib/server/mail';
 
@@ -72,7 +73,12 @@ export const actions = {
                 [result.insertId, token, expiresAt]
             );
 
-            await sendActivationMail(email, name, `${url.origin}/activate?token=${token}`);
+            // Use the configured public origin so email links work when opened
+            // from another device (where localhost would refer to that device).
+            const baseUrl = env.BASE_URL?.trim() || url.origin;
+            const activationUrl = new URL('/activate', baseUrl);
+            activationUrl.searchParams.set('token', token);
+            await sendActivationMail(email, name, activationUrl.toString());
         } catch (error) {
             console.error(error);
             return fail(500, {

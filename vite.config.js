@@ -4,6 +4,8 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+	// Allow phones and other computers on the same network to reach the dev server.
+	server: { host: '0.0.0.0' },
 	plugins: [
 		tailwindcss(),
 		sveltekit({

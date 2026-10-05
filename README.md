@@ -29,6 +29,19 @@ npm run dev
 npm run dev -- --open
 ```
 
+### Testing activation links on another computer
+
+Set `BASE_URL` in `.env` to this computer's reachable LAN address, including the
+Vite port (for example, `http://192.168.1.25:5173`). The app uses this value in
+activation emails. Start the dev server with `npm run dev`; Vite listens on the
+network interface so another device on the same network can open that link.
+Allow port `5173` through the computer's firewall if the other device cannot
+connect. Restart the dev server after changing `.env`.
+
+If the email link says the token is invalid, confirm registration and activation
+are reaching the same running app and database. Activation tokens are stored in
+the database selected by the `DB_*` settings in `.env`.
+
 ## Building
 
 To create a production version of your app:
