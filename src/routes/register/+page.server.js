@@ -1,9 +1,11 @@
 import { fail, redirect } from '@sveltejs/kit';
 import bcrypt from 'bcrypt';
-import { db } from '$lib/server/db';
+import crypto from 'crypto';
+import db from '$lib/server/db';
+import { sendActivationMail } from '$lib/server/mail';
 
 export const actions = {
-    default: async ({ request }) => {
+    default: async ({ request, url }) => {
         const formData = await request.formData();
 
         const name = formData.get('name')?.toString().trim();
@@ -36,11 +38,7 @@ export const actions = {
         }
 
         if (Object.keys(errors).length > 0) {
-            return fail(400, {
-                errors,
-                name,
-                email
-            });
+            return fail(400, { errors, name, email });
         }
 
         try {
@@ -51,9 +49,7 @@ export const actions = {
 
             if (existingUsers.length > 0) {
                 return fail(409, {
-                    errors: {
-                        email: 'This email is already registered.'
-                    },
+                    errors: { email: 'This email is already registered.' },
                     name,
                     email
                 });
@@ -61,25 +57,31 @@ export const actions = {
 
             const passwordHash = await bcrypt.hash(password, 12);
 
-            await db.execute(
-                `INSERT INTO users
-                (name, email, password_hash, activated)
-                VALUES (?, ?, ?, FALSE)`,
+            const [result] = await db.execute(
+                `INSERT INTO users (name, email, password_hash, activated)
+                 VALUES (?, ?, ?, FALSE)`,
                 [name, email, passwordHash]
             );
 
+            const token = crypto.randomBytes(32).toString('hex');
+            const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+            await db.execute(
+                `INSERT INTO activation_tokens (user_id, token, expires_at)
+                 VALUES (?, ?, ?)`,
+                [result.insertId, token, expiresAt]
+            );
+
+            await sendActivationMail(email, name, `${url.origin}/activate?token=${token}`);
         } catch (error) {
             console.error(error);
-
             return fail(500, {
-                errors: {
-                    general: 'An error occurred during registration.'
-                },
+                errors: { general: 'An error occurred during registration.' },
                 name,
                 email
             });
         }
 
-        redirect(303, '/activate');
+        throw redirect(303, '/register/success');
     }
 };
