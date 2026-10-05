@@ -1,60 +1,42 @@
-import { fail } from '@sveltejs/kit';
 import db from '$lib/server/db';
 
-export const actions = {
-    default: async ({ request }) => {
-        const data = await request.formData();
-        const token = data.get('token');
+export async function load({ url }) {
+    const token = url.searchParams.get('token')?.trim();
 
-        // Prüfen, ob Token vorhanden ist
-        if (!token) {
-            return fail(400, {
-                message: 'Aktivierungstoken fehlt.'
-            });
-        }
+    if (!token) {
+        return { success: false, message: 'Kein Aktivierungstoken gefunden.' };
+    }
 
-        // Token in der Datenbank suchen
+    try {
         const [rows] = await db.execute(
-            `SELECT *
-             FROM activation_tokens
-             WHERE token = ?`,
+            'SELECT * FROM activation_tokens WHERE token = ?',
             [token]
         );
 
-        // Token nicht gefunden
         if (rows.length === 0) {
-            return fail(400, {
-                message: 'Ungültiger Aktivierungstoken.'
-            });
+            return { success: false, message: 'Ungültiger Aktivierungstoken.' };
         }
 
-        const activationToken = rows[0];
+        const t = rows[0];
 
-        // Ablaufdatum überprüfen
-        if (new Date(activationToken.expires_at) < new Date()) {
-            return fail(400, {
-                message: 'Der Aktivierungstoken ist abgelaufen.'
-            });
+        const [users] = await db.execute(
+            'SELECT activated FROM users WHERE id = ?',
+            [t.user_id]
+        );
+
+        if (users.length > 0 && users[0].activated) {
+            return { success: true, message: 'Dein Account ist bereits aktiviert.' };
         }
 
-        // User aktivieren
-        await db.execute(
-            `UPDATE users
-             SET activated = true
-             WHERE id = ?`,
-            [activationToken.user_id]
-        );
+        if (new Date(t.expires_at) < new Date()) {
+            return { success: false, message: 'Der Aktivierungstoken ist abgelaufen.' };
+        }
 
-        // Token löschen
-        await db.execute(
-            `DELETE FROM activation_tokens
-             WHERE id = ?`,
-            [activationToken.id]
-        );
+        await db.execute('UPDATE users SET activated = TRUE WHERE id = ?', [t.user_id]);
 
-        return {
-            success: true,
-            message: 'Account erfolgreich aktiviert!'
-        };
+        return { success: true, message: 'Account erfolgreich aktiviert!' };
+    } catch (error) {
+        console.error('Activation error:', error);
+        return { success: false, message: 'Serverfehler bei der Aktivierung.' };
     }
-};
+}

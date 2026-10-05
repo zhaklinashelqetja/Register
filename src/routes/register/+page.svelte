@@ -1,10 +1,11 @@
 <script>
-    let name = '';
-    let email = '';
-    let password = '';
-    let passwordConfirmation = '';
+    let { form } = $props();
 
-    let errors = {};
+   let name = $state('');
+   let email = $state('');
+   let password = $state('');
+   let passwordConfirmation = $state('');
+   let errors = $state({});
 
     function validate() {
         errors = {};
@@ -41,6 +42,7 @@
 
 <div class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
     <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+
         <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">
             Create Account
         </h1>
@@ -49,14 +51,28 @@
             Register a new account
         </p>
 
-        <form method="POST" onsubmit={(event) => {
-            if (!validate()) {
-                event.preventDefault();
-            }
-        }} class="space-y-5">
+        {#if form?.errors?.general}
+            <p class="mb-4 text-center text-red-600">
+                {form.errors.general}
+            </p>
+        {/if}
 
+        <form
+            method="POST"
+            onsubmit={(event) => {
+                if (!validate()) {
+                    event.preventDefault();
+                }
+            }}
+            class="space-y-5"
+        >
+
+            <!-- NAME -->
             <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                    for="name"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                >
                     Name
                 </label>
 
@@ -70,12 +86,24 @@
                 />
 
                 {#if errors.name}
-                    <p class="mt-1 text-sm text-red-600">{errors.name}</p>
+                    <p class="mt-1 text-sm text-red-600">
+                        {errors.name}
+                    </p>
+                {/if}
+
+                {#if form?.errors?.name}
+                    <p class="mt-1 text-sm text-red-600">
+                        {form.errors.name}
+                    </p>
                 {/if}
             </div>
 
+            <!-- EMAIL -->
             <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                    for="email"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                >
                     Email
                 </label>
 
@@ -89,12 +117,24 @@
                 />
 
                 {#if errors.email}
-                    <p class="mt-1 text-sm text-red-600">{errors.email}</p>
+                    <p class="mt-1 text-sm text-red-600">
+                        {errors.email}
+                    </p>
+                {/if}
+
+                {#if form?.errors?.email}
+                    <p class="mt-1 text-sm text-red-600">
+                        {form.errors.email}
+                    </p>
                 {/if}
             </div>
 
+            <!-- PASSWORD -->
             <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                    for="password"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                >
                     Password
                 </label>
 
@@ -108,12 +148,24 @@
                 />
 
                 {#if errors.password}
-                    <p class="mt-1 text-sm text-red-600">{errors.password}</p>
+                    <p class="mt-1 text-sm text-red-600">
+                        {errors.password}
+                    </p>
+                {/if}
+
+                {#if form?.errors?.password}
+                    <p class="mt-1 text-sm text-red-600">
+                        {form.errors.password}
+                    </p>
                 {/if}
             </div>
 
+            <!-- CONFIRM PASSWORD -->
             <div>
-                <label for="passwordConfirmation" class="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                    for="passwordConfirmation"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                >
                     Confirm Password
                 </label>
 
@@ -127,16 +179,26 @@
                 />
 
                 {#if errors.passwordConfirmation}
-                    <p class="mt-1 text-sm text-red-600">{errors.passwordConfirmation}</p>
+                    <p class="mt-1 text-sm text-red-600">
+                        {errors.passwordConfirmation}
+                    </p>
+                {/if}
+
+                {#if form?.errors?.passwordConfirmation}
+                    <p class="mt-1 text-sm text-red-600">
+                        {form.errors.passwordConfirmation}
+                    </p>
                 {/if}
             </div>
 
+            <!-- BUTTON -->
             <button
                 type="submit"
                 class="w-full rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition"
             >
                 Register
             </button>
+
         </form>
     </div>
 </div>
