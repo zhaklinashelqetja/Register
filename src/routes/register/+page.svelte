@@ -19,18 +19,24 @@
 
 		if (!name.trim()) {
 			errors.name = 'Name is required.';
+		} else if (Array.from(name.trim()).length > 100) {
+			errors.name = 'Name must be 100 characters or fewer.';
 		}
 
 		if (!email.trim()) {
 			errors.email = 'Email is required.';
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			errors.email = 'Please enter a valid email address.';
+		} else if (Array.from(email.trim()).length > 255) {
+			errors.email = 'Email must be 255 characters or fewer.';
 		}
 
 		if (!password) {
 			errors.password = 'Password is required.';
 		} else if (password.length < 8) {
 			errors.password = 'Password must be at least 8 characters.';
+		} else if (new TextEncoder().encode(password).length > 72) {
+			errors.password = 'Password must be 72 bytes or fewer.';
 		}
 
 		if (!passwordConfirmation) {
@@ -76,6 +82,7 @@
 					id="name"
 					name="name"
 					type="text"
+					maxlength="100"
 					bind:value={name}
 					class="w-full rounded-lg border px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none {errors.name
 						? 'border-red-500'
@@ -104,6 +111,7 @@
 					id="email"
 					name="email"
 					type="email"
+					maxlength="255"
 					bind:value={email}
 					class="w-full rounded-lg border px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none {errors.email
 						? 'border-red-500'
@@ -134,6 +142,7 @@
 					id="password"
 					name="password"
 					type="password"
+					maxlength="72"
 					bind:value={password}
 					class="w-full rounded-lg border px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none {errors.password
 						? 'border-red-500'
@@ -164,6 +173,7 @@
 					id="passwordConfirmation"
 					name="passwordConfirmation"
 					type="password"
+					maxlength="72"
 					bind:value={passwordConfirmation}
 					class="w-full rounded-lg border px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:outline-none {errors.passwordConfirmation
 						? 'border-red-500'
