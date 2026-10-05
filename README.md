@@ -18,12 +18,10 @@ listens on port `5173` on the network interfaces so other devices can connect.
 
 ## Activation email links
 
-Set `BASE_URL` in `.env` to an address the recipient can reach. On the same
-network, use this computer's LAN address, for example
-`http://192.168.1.25:5173`. Allow port `5173` through the computer's firewall if
-needed. A private `10.x.x.x` or `192.168.x.x` address only works for devices on
-that LAN or VPN. To reach a PC from outside that network, use a public HTTPS
-tunnel or deploy the app, then set `BASE_URL` to that public HTTPS address.
+For local development, set `BASE_URL=http://localhost:5173` in `.env`. Email
+activation links then open on the same computer running the app. `localhost`
+always refers to the computer opening the link, so it will not reach this app
+when opened from another PC.
 
 Restart the dev server after changing `.env`. Previously sent emails keep their
 original links. Registration and activation must use the same running app and

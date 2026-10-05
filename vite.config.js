@@ -4,8 +4,8 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	// Allow phones and other computers on the same network to reach the dev server.
-	server: { host: '0.0.0.0', port: 5173, strictPort: true },
+	// Keep local development available only on this computer.
+	server: { host: '127.0.0.1', port: 5173, strictPort: true },
 	plugins: [
 		tailwindcss(),
 		sveltekit({

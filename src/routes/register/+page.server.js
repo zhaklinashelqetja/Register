@@ -5,7 +5,10 @@ import { env } from '$env/dynamic/private';
 import db from '$lib/server/db';
 import { sendActivationMail } from '$lib/server/mail';
 
-function registrationErrorMessage(error) {
+function registrationErrorMessage(error, stage) {
+	if (stage === 'sending the activation email') {
+		return 'The account could not be registered because the activation email could not be sent. Check the SMTP settings in .env and try again.';
+	}
 	if (error?.code === 'ER_ACCESS_DENIED_ERROR') {
 		return 'The database rejected its login. Check DB_USER and DB_PASSWORD in your .env file.';
 	}
@@ -106,17 +109,13 @@ export const actions = {
 
 			// Use the configured public origin so email links work when opened
 			// from another device (where localhost would refer to that device).
-			const baseUrl = env.BASE_URL?.trim() || url.origin;
+			const baseUrl = env.PUBLIC_BASE_URL?.trim() || url.origin;
 			const activationUrl = new URL('/activate', baseUrl);
 			activationUrl.searchParams.set('token', token);
 			stage = 'sending the activation email';
 			await sendActivationMail(email, name, activationUrl.toString());
 		} catch (error) {
-<<<<<<< HEAD
-			console.error('Registration error:', error?.code || error?.message);
-=======
-			console.error(`Registration failed while ${stage}:`, error);
->>>>>>> f160de4322ad19dcfcdc93baa3517f44eef11f45
+			console.error(`Registration failed while ${stage}:`, error?.code || error?.message);
 			if (error?.code === 'ER_DUP_ENTRY') {
 				return fail(409, {
 					errors: { email: 'This email is already registered.' },
@@ -135,16 +134,7 @@ export const actions = {
 				}
 			}
 			return fail(500, {
-<<<<<<< HEAD
-				errors: { general: registrationErrorMessage(error) },
-=======
-				errors: {
-					general:
-						stage === 'sending the activation email'
-							? 'Your account could not be registered because the activation email could not be sent. Please try again later.'
-							: 'Your account could not be saved. Please try again later.'
-				},
->>>>>>> f160de4322ad19dcfcdc93baa3517f44eef11f45
+				errors: { general: registrationErrorMessage(error, stage) },
 				name,
 				email
 			});
