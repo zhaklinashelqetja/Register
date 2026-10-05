@@ -18,18 +18,24 @@ export const actions = {
 
 		if (!name) {
 			errors.name = 'Name is required.';
+		} else if (Array.from(name).length > 100) {
+			errors.name = 'Name must be 100 characters or fewer.';
 		}
 
 		if (!email) {
 			errors.email = 'Email is required.';
 		} else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
 			errors.email = 'Please enter a valid email address.';
+		} else if (Array.from(email).length > 255) {
+			errors.email = 'Email must be 255 characters or fewer.';
 		}
 
 		if (!password) {
 			errors.password = 'Password is required.';
 		} else if (password.length < 8) {
 			errors.password = 'Password must be at least 8 characters.';
+		} else if (Buffer.byteLength(password, 'utf8') > 72) {
+			errors.password = 'Password must be 72 bytes or fewer.';
 		}
 
 		if (!passwordConfirmation) {
@@ -43,6 +49,7 @@ export const actions = {
 		}
 
 		let insertedUserId;
+		let stage = 'checking the database';
 		try {
 			const [existingUsers] = await db.execute('SELECT id FROM users WHERE email = ?', [email]);
 
@@ -54,8 +61,10 @@ export const actions = {
 				});
 			}
 
+			stage = 'hashing the password';
 			const passwordHash = await bcrypt.hash(password, 12);
 
+			stage = 'saving the account';
 			const [result] = await db.execute(
 				`INSERT INTO users (name, email, password_hash, activated)
                  VALUES (?, ?, ?, FALSE)`,
@@ -77,9 +86,10 @@ export const actions = {
 			const baseUrl = env.BASE_URL?.trim() || url.origin;
 			const activationUrl = new URL('/activate', baseUrl);
 			activationUrl.searchParams.set('token', token);
+			stage = 'sending the activation email';
 			await sendActivationMail(email, name, activationUrl.toString());
 		} catch (error) {
-			console.error(error);
+			console.error(`Registration failed while ${stage}:`, error);
 			if (error?.code === 'ER_DUP_ENTRY') {
 				return fail(409, {
 					errors: { email: 'This email is already registered.' },
@@ -98,7 +108,12 @@ export const actions = {
 				}
 			}
 			return fail(500, {
-				errors: { general: 'Registration could not be completed. Please try again.' },
+				errors: {
+					general:
+						stage === 'sending the activation email'
+							? 'Your account could not be registered because the activation email could not be sent. Please try again later.'
+							: 'Your account could not be saved. Please try again later.'
+				},
 				name,
 				email
 			});
