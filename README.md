@@ -2,6 +2,15 @@
 
 SvelteKit account registration with MySQL-backed email activation.
 
+## Registration configuration
+
+Set `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` in `.env` for
+the MySQL database. It must contain the `users` and `activation_tokens` tables
+used by the registration and activation routes.
+
+Activation emails require `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`,
+`SMTP_PASSWORD`, and `SMTP_FROM` in `.env`.
+
 ## Run locally
 
 Install dependencies with `npm install`, then run `npm run dev`. The dev server

@@ -9,6 +9,13 @@ function escapeHtml(value) {
 }
 
 export async function sendActivationMail(to, name, link) {
+	const requiredSettings = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASSWORD', 'SMTP_FROM'];
+	if (requiredSettings.some((key) => !env[key]) || !env.SMTP_PORT) {
+		const error = new Error('SMTP settings are incomplete');
+		error.code = 'SMTP_NOT_CONFIGURED';
+		throw error;
+	}
+
 	const port = Number(env.SMTP_PORT || 587);
 	const transporter = nodemailer.createTransport({
 		host: env.SMTP_HOST,

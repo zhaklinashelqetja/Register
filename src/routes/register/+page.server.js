@@ -5,6 +5,29 @@ import { env } from '$env/dynamic/private';
 import db from '$lib/server/db';
 import { sendActivationMail } from '$lib/server/mail';
 
+function registrationErrorMessage(error) {
+	if (error?.code === 'ER_ACCESS_DENIED_ERROR') {
+		return 'The database rejected its login. Check DB_USER and DB_PASSWORD in your .env file.';
+	}
+	if (
+		error?.code === 'ENOTFOUND' ||
+		error?.code === 'ECONNREFUSED' ||
+		error?.code === 'ETIMEDOUT'
+	) {
+		return 'The database could not be reached. Check DB_HOST and DB_PORT and make sure the server is online.';
+	}
+	if (error?.code === 'ER_BAD_DB_ERROR') {
+		return 'The configured database was not found. Check DB_NAME in your .env file.';
+	}
+	if (error?.code === 'ER_NO_SUCH_TABLE') {
+		return 'The registration tables are missing from the configured database.';
+	}
+	if (error?.code === 'SMTP_NOT_CONFIGURED') {
+		return 'Email delivery is not configured. Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, and SMTP_FROM in your .env file.';
+	}
+	return 'Registration could not be completed. Check the server configuration and try again.';
+}
+
 export const actions = {
 	default: async ({ request, url }) => {
 		const formData = await request.formData();
@@ -79,7 +102,7 @@ export const actions = {
 			activationUrl.searchParams.set('token', token);
 			await sendActivationMail(email, name, activationUrl.toString());
 		} catch (error) {
-			console.error(error);
+			console.error('Registration error:', error?.code || error?.message);
 			if (error?.code === 'ER_DUP_ENTRY') {
 				return fail(409, {
 					errors: { email: 'This email is already registered.' },
@@ -98,7 +121,7 @@ export const actions = {
 				}
 			}
 			return fail(500, {
-				errors: { general: 'Registration could not be completed. Please try again.' },
+				errors: { general: registrationErrorMessage(error) },
 				name,
 				email
 			});

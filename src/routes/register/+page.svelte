@@ -1,11 +1,18 @@
 <script>
 	let { form } = $props();
 
-	let name = $state(form?.name ?? '');
-	let email = $state(form?.email ?? '');
+	let name = $state('');
+	let email = $state('');
 	let password = $state('');
 	let passwordConfirmation = $state('');
 	let errors = $state({});
+
+	$effect(() => {
+		if (form) {
+			name = form.name ?? '';
+			email = form.email ?? '';
+		}
+	});
 
 	function validate() {
 		errors = {};
