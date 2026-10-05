@@ -1,35 +1,29 @@
 <script>
-    import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 </script>
 
 <svelte:head>
-    <title>Registrierung erfolgreich</title>
+	<title>Registrierung erfolgreich</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 text-center">
+<div class="flex min-h-screen items-center justify-center bg-gray-100 px-4">
+	<div class="w-full max-w-md rounded-xl bg-white p-8 text-center shadow-lg">
+		<div class="mb-4 text-5xl">📧</div>
 
-        <div class="text-5xl mb-4">📧</div>
+		<h1 class="mb-3 text-3xl font-bold text-gray-800">Fast geschafft!</h1>
 
-        <h1 class="text-3xl font-bold text-gray-800 mb-3">
-            Fast geschafft!
-        </h1>
+		<p class="mb-6 text-gray-600">
+			Wir haben dir eine E-Mail mit einem Aktivierungslink geschickt. Bitte klicke auf den Link in
+			der Mail, um deinen Account zu aktivieren.
+		</p>
 
-        <p class="text-gray-600 mb-6">
-            Wir haben dir eine E-Mail mit einem Aktivierungslink geschickt.
-            Bitte klicke auf den Link in der Mail, um deinen Account zu aktivieren.
-        </p>
+		<p class="mb-8 text-sm text-gray-400">Keine Mail bekommen? Schau auch im Spam-Ordner nach.</p>
 
-        <p class="text-sm text-gray-400 mb-8">
-            Keine Mail bekommen? Schau auch im Spam-Ordner nach.
-        </p>
-
-        <button
-            onclick={() => goto('/')}
-            class="w-full rounded-lg bg-blue-600 py-3 text-white font-semibold hover:bg-blue-700 transition"
-        >
-            Zurück zur Startseite
-        </button>
-
-    </div>
+		<a
+			href={resolve('/')}
+			class="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700"
+		>
+			Zurück zur Startseite
+		</a>
+	</div>
 </div>
